@@ -33,7 +33,7 @@ dataset = LeRobotDataset.create(
     robot_type=robot.name,
     use_videos=True,
     image_writer_threads=4,
-    metadata_buffer_size=10, # smaller than episode number
+    metadata_buffer_size=metadata_buffer_size, # smaller than episode number
 )
 
 # ===================== UI & Processors =====================
@@ -51,6 +51,7 @@ while episode_idx < NUM_EPISODES and not events["stop_recording"]:
     log_say(f"Episode {episode_idx + 1}")
     print(f"Episode {episode_idx + 1}")
     if os.name == 'nt':
+        # Extra sound for start to differentiate from reset
         winsound.Beep(1000, 500)  # Beep at 1000 Hz for 500 ms
 
     record_loop(
@@ -69,9 +70,10 @@ while episode_idx < NUM_EPISODES and not events["stop_recording"]:
 
     if not events["stop_recording"] and (episode_idx < NUM_EPISODES - 1 or events["rerecord_episode"]):
         if os.name == 'nt':
-            winsound.Beep(2000, 200)  # Beep at 1000 Hz for 500 ms
-            winsound.Beep(500, 400)  # Beep at 1000 Hz for 500 ms
-            winsound.Beep(2000, 200)  # Beep at 1000 Hz for 500 ms
+            # Extra sound for reset to differentiate from start
+            winsound.Beep(2000, 200)  
+            winsound.Beep(500, 400)  
+            winsound.Beep(2000, 200)   
         log_say("Reset the environment")
         record_loop(
             robot=robot,

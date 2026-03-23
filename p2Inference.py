@@ -13,7 +13,7 @@ from lerobot.utils.utils import log_say
 from lerobot.utils.visualization_utils import init_rerun
 from lerobot.processor import make_default_processors
 
-from Project_2_Config import *
+from p2Config import *
 
 import json
 import time

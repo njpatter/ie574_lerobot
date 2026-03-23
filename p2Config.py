@@ -1,11 +1,12 @@
 from datetime import datetime
 import os
 from lerobot.cameras.opencv.configuration_opencv import OpenCVCameraConfig
-from lerobot.robots.so_follower.config_so_follower import SO101FollowerConfig
-from lerobot.teleoperators.so_leader.config_so_leader import SO101LeaderConfig 
+from lerobot.robots.so_follower.config_so_follower import SO101Follower, SO101FollowerConfig
+from lerobot.teleoperators.so_leader.config_so_leader import SO101LeaderConfig  
 
 # Data collection parameters
 NUM_EPISODES = 50  
+metadata_buffer_size = min(10, NUM_EPISODES - 1) 
 FPS = 30
 EPISODE_TIME_SEC = 12  
 RESET_TIME_SEC = 8
@@ -30,6 +31,7 @@ if not os.path.exists(home_config_file):
 TRAINING_COUNT=20000 
 LOCAL_CKPT_PATH = os.path.join(os.getcwd(), "outputs/checkpoints/060000/pretrained_model")  
 
+# Camera config used in all of the other files
 camera_config = {
     "front": OpenCVCameraConfig(
         index_or_path=0,
@@ -38,6 +40,7 @@ camera_config = {
         fps=FPS
     )
 }
+
 
 teleop_config = SO101LeaderConfig(
     port="COM3", #"/dev/ttyACM1",
