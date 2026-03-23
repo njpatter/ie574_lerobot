@@ -1,0 +1,7 @@
+lerobot-equibim
+datasets
+outputs
+
+__pycache__
+*.bat
+.env
