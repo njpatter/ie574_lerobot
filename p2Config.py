@@ -1,8 +1,17 @@
 from datetime import datetime
 import os
 from lerobot.cameras.opencv.configuration_opencv import OpenCVCameraConfig
-from lerobot.robots.so_follower.config_so_follower import SO101Follower, SO101FollowerConfig
+from lerobot.robots.so_follower.config_so_follower import SO101FollowerConfig
 from lerobot.teleoperators.so_leader.config_so_leader import SO101LeaderConfig  
+
+# Use lerobot-find-ports for determining what is what
+# Serial ports for running everything
+if os.name == 'nt':  # Windows, change these appropriately
+    port_follower = "COM5"
+    port_leader = "COM3"
+else:  # Mac or linux, change these appropriately
+    port_follower = "/dev/tty.usbmodem5AE60581401" # This was original for linux "/dev/ttyACM0"
+    port_leader = "/dev/tty.usbmodem5AE60856631" # This was original for linux "/dev/ttyACM1"
 
 # Data collection parameters
 NUM_EPISODES = 50  
@@ -34,7 +43,7 @@ LOCAL_CKPT_PATH = os.path.join(os.getcwd(), "outputs/checkpoints/060000/pretrain
 # Camera config used in all of the other files
 camera_config = {
     "front": OpenCVCameraConfig(
-        index_or_path=0,
+        index_or_path=1,
         width=640,
         height=480,
         fps=FPS
@@ -43,12 +52,12 @@ camera_config = {
 
 
 teleop_config = SO101LeaderConfig(
-    port="COM3", #"/dev/ttyACM1",
+    port=port_leader,
     id="leader_njp",
 )
 
 robot_config = SO101FollowerConfig(
-    port="COM5", #"/dev/ttyACM0",
+    port=port_follower,
     id="follower_njp",
     cameras=camera_config,
 )
