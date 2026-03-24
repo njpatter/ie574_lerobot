@@ -38,7 +38,7 @@ if not os.path.exists(home_config_file):
 
 # Training epoch count and checkpoint path
 TRAINING_COUNT=20000 
-LOCAL_CKPT_PATH = os.path.join(os.getcwd(), "outputs/checkpoints/060000/pretrained_model")  
+LOCAL_CKPT_PATH = os.path.join(os.getcwd(), "outputs/checkpoints/last/pretrained_model")  
 
 # Camera config used in all of the other files
 camera_config = {
