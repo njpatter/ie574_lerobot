@@ -26,7 +26,7 @@ datasets_dir = os.path.join(os.getcwd(), "datasets")
 # If datasets_dir doesn't exist, create it
 if not os.path.exists(datasets_dir):
     os.makedirs(datasets_dir)
-HF_DATASET_ID = os.path.join(datasets_dir, datetime.now().strftime("%Y-%m-%d_%H-%M"))
+HF_DATASET_ID = os.path.join(datasets_dir, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
 
 
 # Home configuration file
@@ -43,9 +43,15 @@ LOCAL_CKPT_PATH = os.path.join(os.getcwd(), "outputs/checkpoints/last/pretrained
 # Camera config used in all of the other files
 camera_config = {
     "front": OpenCVCameraConfig(
-        index_or_path=1,
+        index_or_path=0,
         width=640,
         height=480,
+        fps=FPS
+    ),
+    "top": OpenCVCameraConfig(
+        index_or_path=2,
+        width=960,
+        height=540,
         fps=FPS
     )
 }

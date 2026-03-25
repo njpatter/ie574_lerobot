@@ -14,6 +14,7 @@ from lerobot.utils.visualization_utils import init_rerun
 from lerobot.processor import make_default_processors
 
 from p2Config import *
+import multiprocessing as mp
 
 import json
 import time
@@ -31,67 +32,71 @@ def reset_robot(robot, home_action, steps=100):
         robot.send_action(home_action)
         time.sleep(0.04)  # 25Hz
 
+def main():
+    robot = SO101Follower(robot_config)
 
-robot = SO101Follower(robot_config)
+    # ===================== Load Policy =====================
+    policy = ACTPolicy.from_pretrained(LOCAL_CKPT_PATH)
+    # policy = DiffusionPolicy.from_pretrained(LOCAL_CKPT_PATH)
 
-# ===================== Load Policy =====================
-policy = ACTPolicy.from_pretrained(LOCAL_CKPT_PATH)
-# policy = DiffusionPolicy.from_pretrained(LOCAL_CKPT_PATH)
+    # ===================== Dataset Features =====================
+    action_features = hw_to_dataset_features(robot.action_features, "action")
+    obs_features = hw_to_dataset_features(robot.observation_features, "observation")
+    dataset_features = {**action_features, **obs_features}
 
-# ===================== Dataset Features =====================
-action_features = hw_to_dataset_features(robot.action_features, "action")
-obs_features = hw_to_dataset_features(robot.observation_features, "observation")
-dataset_features = {**action_features, **obs_features}
-
-dataset = LeRobotDataset.create(
-    repo_id=HF_DATASET_ID,
-    fps=FPS,
-    features=dataset_features,
-    robot_type=robot.name,
-    use_videos=True,
-    image_writer_threads=4,
-)
-
-# ===================== UI =====================
-_, events = init_keyboard_listener()
-init_rerun(session_name="single_inference")
-
-# ===================== Connect =====================
-robot.connect()
-
-# ===================== Pre/Post Processors =====================
-preprocessor, postprocessor = make_pre_post_processors(
-    policy_cfg=policy,
-    pretrained_path=LOCAL_CKPT_PATH,
-    dataset_stats=dataset.meta.stats,
-)
-
-teleop_action_processor, robot_action_processor, robot_observation_processor = make_default_processors()
-
-# ===================== Inference Loop =====================
-for episode_idx in range(NUM_EPISODES):
-    log_say(f"Episode {episode_idx + 1}")
-
-    record_loop(
-        robot=robot,
-        events=events,
+    dataset = LeRobotDataset.create(
+        repo_id=HF_DATASET_ID,
         fps=FPS,
-        policy=policy,
-        teleop_action_processor=teleop_action_processor,
-        robot_action_processor=robot_action_processor,
-        robot_observation_processor=robot_observation_processor,
-        preprocessor=preprocessor,
-        postprocessor=postprocessor,
-        dataset=dataset,
-        control_time_s=EPISODE_TIME_SEC,
-        single_task=TASK_DESCRIPTION,
-        display_data=False,
+        features=dataset_features,
+        robot_type=robot.name,
+        use_videos=True,
+        image_writer_threads=4,
     )
 
-    dataset.save_episode()
+    # ===================== UI =====================
+    _, events = init_keyboard_listener()
+    init_rerun(session_name="single_inference")
 
-    reset_robot(robot, open_gripper(HOME_ACTION), steps=50)
-    reset_robot(robot, HOME_ACTION, steps=100)
+    # ===================== Connect =====================
+    robot.connect()
 
-# ===================== Cleanup =====================
-robot.disconnect()
+    # ===================== Pre/Post Processors =====================
+    preprocessor, postprocessor = make_pre_post_processors(
+        policy_cfg=policy,
+        pretrained_path=LOCAL_CKPT_PATH,
+        dataset_stats=dataset.meta.stats,
+    )
+
+    teleop_action_processor, robot_action_processor, robot_observation_processor = make_default_processors()
+
+    # ===================== Inference Loop =====================
+    for episode_idx in range(NUM_EPISODES):
+        log_say(f"Episode {episode_idx + 1}")
+
+        record_loop(
+            robot=robot,
+            events=events,
+            fps=FPS,
+            policy=policy,
+            teleop_action_processor=teleop_action_processor,
+            robot_action_processor=robot_action_processor,
+            robot_observation_processor=robot_observation_processor,
+            preprocessor=preprocessor,
+            postprocessor=postprocessor,
+            dataset=dataset,
+            control_time_s=EPISODE_TIME_SEC,
+            single_task=TASK_DESCRIPTION,
+            display_data=False,
+        )
+
+        dataset.save_episode()
+
+        reset_robot(robot, open_gripper(HOME_ACTION), steps=50)
+        reset_robot(robot, HOME_ACTION, steps=100)
+
+    # ===================== Cleanup =====================
+    robot.disconnect()
+
+if __name__ == "__main__":
+    mp.freeze_support()
+    main()
