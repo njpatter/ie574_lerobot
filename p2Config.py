@@ -43,13 +43,13 @@ LOCAL_CKPT_PATH = os.path.join(os.getcwd(), "outputs/checkpoints/last/pretrained
 # Camera config used in all of the other files
 camera_config = {
     "front": OpenCVCameraConfig(
-        index_or_path=0,
+        index_or_path=2,
         width=640,
         height=480,
         fps=FPS
     ),
     "top": OpenCVCameraConfig(
-        index_or_path=2,
+        index_or_path=1,
         width=960,
         height=540,
         fps=FPS
